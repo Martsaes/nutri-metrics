@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriMetrics | Métrica nutricional avanzada</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="vendor/jspdf.umd.min.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
+        <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6" aria-label="Navegación principal">
+            <a href="#" class="flex min-w-0 items-center gap-2 font-bold text-gray-800" aria-label="NutriMetrics, inicio" id="linkInicio">
+                <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-mutual text-white" aria-hidden="true">N</span>
+                <span class="flex min-w-0 flex-col">
+                    <span class="truncate">NutriMetrics</span>
+                    <span class="truncate text-[10px] font-medium text-gray-500">Métrica nutricional avanzada</span>
+                </span>
+            </a>
+            <div class="hidden items-center gap-2 md:flex" role="tablist" aria-label="Secciones del registro">
+                <button type="button" class="nav-tab nav-tab-active" id="tabBtnTest" role="tab" aria-controls="tab-test" aria-selected="true" data-tab="test">1. Test de Estilo de Vida</button>
+                <button type="button" class="nav-tab" id="tabBtnDieta" role="tab" aria-controls="tab-dieta" aria-selected="false" data-tab="diet">2. Registro Dietético 24h</button>
+                <button type="button" class="nav-tab" id="tabBtnFrecuencia" role="tab" aria-controls="tab-frecuencia" aria-selected="false" data-tab="frequency">3. Frecuencia de Consumo</button>
+            </div>
+            <button type="button" id="btnMenuMovil" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition hover:bg-gray-100 md:hidden" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="menuMovil">
+                <svg id="iconoMenuAbrir" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg id="iconoMenuCerrar" xmlns="http://www.w3.org/2000/svg" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </nav>
+        <div id="menuMovil" class="mobile-menu hidden border-t border-gray-100 bg-white px-4 pb-3 md:hidden" role="tablist" aria-label="Secciones del registro">
+            <button type="button" class="nav-tab-mobile nav-tab-mobile-active" role="tab" aria-controls="tab-test" aria-selected="true" data-tab="test">1. Test de Estilo de Vida</button>
+            <button type="button" class="nav-tab-mobile" role="tab" aria-controls="tab-dieta" aria-selected="false" data-tab="diet">2. Registro Dietético 24h</button>
+            <button type="button" class="nav-tab-mobile" role="tab" aria-controls="tab-frecuencia" aria-selected="false" data-tab="frequency">3. Frecuencia de Consumo</button>
+        </div>
+    </header>
+
+    <section id="welcomeScreen" class="mx-auto max-w-xl px-4 py-10 sm:py-16" aria-labelledby="welcomeTitle">
+        <div class="welcome-card rounded-2xl border border-gray-200 border-t-8 border-t-mutual bg-white p-6 shadow-xl sm:p-9">
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-2xl font-bold text-mutual" aria-hidden="true">N</div>
+            <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-mutual">NutriMetrics · Métrica nutricional avanzada</p>
+            <h1 id="welcomeTitle" class="text-2xl font-bold text-gray-900 sm:text-3xl">Comencemos con tu evaluación</h1>
+            <p class="mt-3 text-sm leading-6 text-gray-600">Ingresa el nombre de la persona evaluada. Lo usaremos en el test y en el registro dietético.</p>
+            <form id="welcomeForm" class="mt-6 space-y-4">
+                <div>
+                    <label for="nombreEvaluadoInput" class="mb-1 block text-sm font-medium text-gray-700">Nombre Completo del Paciente <span class="text-red-600" aria-hidden="true">*</span></label>
+                    <input id="nombreEvaluadoInput" name="nombreEvaluado" type="text" autocomplete="name" maxlength="120" required class="w-full rounded-lg border border-gray-300 px-4 py-3 text-base shadow-sm transition focus:border-mutual focus:outline-none focus:ring-4 focus:ring-green-100" placeholder="Escribe el nombre completo">
+                </div>
+                <button type="submit" class="w-full rounded-lg bg-mutual px-5 py-3 font-bold text-white shadow-md transition hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mutual">Comenzar Evaluación</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Contenedor Principal -->
+    <main id="appContent" class="hidden mx-auto mb-10 mt-6 max-w-4xl rounded-xl border-t-8 border-mutual bg-white p-4 shadow-lg sm:p-6 md:p-10">
+        <div class="mb-6 flex flex-col gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Evaluación nutricional integral</p>
+                <p class="mt-1 text-lg font-semibold text-gray-900" id="nombrePacienteCabecera"></p>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <button type="button" id="btnGenerarReporte" class="rounded-lg bg-mutual px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700">Generar Reporte Clínico Unificado</button>
+                <button type="button" id="btnCompartirWhatsApp" class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">Compartir por WhatsApp</button>
+            </div>
+        </div>
+        <section id="tab-test" role="tabpanel" aria-labelledby="tabBtnTest" data-tab-panel="test">
+        
+        <!-- Encabezado -->
+        <div class="text-center mb-6 md:mb-8 border-b pb-4">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 leading-tight">TEST DE AUTOEVALUACIÓN SOBRE ESTILOS DE VIDA: "FANTÁSTICO"</h1>
+            <p class="mt-2 text-sm font-semibold text-mutual" id="nombrePacienteTest"></p>
+            <p class="text-xs sm:text-sm text-gray-600 mt-2">Contesta el cuestionario recordando tu vida en el último mes.</p>
+        </div>
+
+        <!-- Formulario -->
+        <form id="testForm" class="space-y-6 md:space-y-8">
+            
+            <!-- F -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">F</span>
+                    Familia y amigos
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">1. Tengo con quién hablar las cosas que son importantes para mí.</label>
+                        <select name="f1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">2. Yo doy y recibo cariño.</label>
+                        <select name="f2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">A</span>
+                    Actividad física
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">3. Yo realizo actividad física (caminar, subir escalas, trabajo de la casa, hacer el jardín).</label>
+                        <select name="a1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">4. Yo hago ejercicio en forma activa al menos 20 minutos (correr, andar en bicicleta, bailar, etc.)</label>
+                        <select name="a2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">3 o más veces por semana (2 pts)</option>
+                            <option value="1">1 a 2 veces por semana (1 pt)</option>
+                            <option value="0">Menos de 1 vez por semana (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- N -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">N</span>
+                    Nutrición
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">5. Mi alimentación es balanceada. (*)</label>
+                        <select name="n1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">6. A menudo consumo mucha azúcar, sal o comida chatarra.</label>
+                        <select name="n2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Ninguna de estas cosas (2 pts)</option>
+                            <option value="1">Algunas de estas cosas (1 pt)</option>
+                            <option value="0">Todas estas (0 pts)</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs sm:text-sm font-medium mb-1">7. Estoy pasado de mi peso ideal.</label>
+                        <select name="n3" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Normal o hasta 4 kilos de más (2 pts)</option>
+                            <option value="1">Entre 5 y 9 kilos de más (1 pt)</option>
+                            <option value="0">9 kilos o más (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- T -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">T</span>
+                    Tabaco
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">8. Yo fumo cigarrillos:</label>
+                        <select name="t1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">No en los últimos 5 años (2 pts)</option>
+                            <option value="1">No en el último año (1 pt)</option>
+                            <option value="0">Fumé en este año (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">9. Generalmente fumo... cigarrillos por día:</label>
+                        <select name="t2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Ninguno (2 pts)</option>
+                            <option value="1">0 a 10 (1 pt)</option>
+                            <option value="0">más de 10 (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A (Alcohol) -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">A</span>
+                    Alcohol
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">10. Mi número promedio de tragos (**) por semana es:</label>
+                        <select name="al1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">0 a 7 tragos (2 pts)</option>
+                            <option value="1">8 a 12 tragos (1 pt)</option>
+                            <option value="0">Más de 12 tragos (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">11. Bebo más de cuatro tragos en una misma ocasión:</label>
+                        <select name="al2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Nunca (2 pts)</option>
+                            <option value="1">Ocasionalmente (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">12. Manejo el auto después de beber alcohol:</label>
+                        <select name="al3" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Nunca (2 pts)</option>
+                            <option value="1">Sólo una vez (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- S -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">S</span>
+                    Sueño / Estrés
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">13. Duermo bien y me siento descansado/a:</label>
+                        <select name="s1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">14. Me siento capaz de manejar el estrés y la tensión en mi vida:</label>
+                        <select name="s2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">15. Yo relajo y disfruto mi tiempo libre:</label>
+                        <select name="s3" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- T (Personalidad) -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">T</span>
+                    Tipo de personalidad
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">16. Parece que ando acelerado/a:</label>
+                        <select name="tp1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi nunca (2 pts)</option>
+                            <option value="1">Algunas veces (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">17. Me siento enojado/a o agresivo/a:</label>
+                        <select name="tp2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi nunca (2 pts)</option>
+                            <option value="1">Algunas veces (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- I -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">I</span>
+                    Introspección
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">18. Yo soy un pensador positivo y optimista:</label>
+                        <select name="i1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">19. Yo me siento tenso/a o apretado/a:</label>
+                        <select name="i2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi nunca (2 pts)</option>
+                            <option value="1">Algunas veces (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">20. Yo me siento deprimido/a o triste:</label>
+                        <select name="i3" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi nunca (2 pts)</option>
+                            <option value="1">Algunas veces (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">C</span>
+                    Conducción / Trabajo
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">21. Yo uso siempre el cinturón de seguridad:</label>
+                        <select name="c1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">22. Yo me siento satisfecho/a con mi trabajo o mis actividades:</label>
+                        <select name="c2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi siempre (2 pts)</option>
+                            <option value="1">A veces (1 pt)</option>
+                            <option value="0">Casi nunca (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- O -->
+            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="font-bold text-base sm:text-lg text-gray-800 mb-2 flex items-center">
+                    <span class="bg-mutual text-white rounded-full w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center mr-2 text-sm sm:text-base flex-shrink-0">O</span>
+                    Otras drogas
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">23. Uso drogas como marihuana, cocaína o pasta base:</label>
+                        <select name="o1" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Nunca (2 pts)</option>
+                            <option value="1">Ocasionalmente (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">24. Uso excesivamente los remedios que me indican o los que puedo comprar sin receta:</label>
+                        <select name="o2" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Casi nunca (2 pts)</option>
+                            <option value="1">Ocasionalmente (1 pt)</option>
+                            <option value="0">A menudo (0 pts)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium mb-1">25. Bebo café, té o bebidas cola que tienen cafeína:</label>
+                        <select name="o3" class="w-full p-2 border rounded-md text-sm" required>
+                            <option value="2">Menos de 3 por día (2 pts)</option>
+                            <option value="1">3 a 6 por día (1 pt)</option>
+                            <option value="0">Más de 6 por día (0 pts)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6 md:mt-8 pt-4 border-t">
+                <button type="button" id="btnMostrarResultado" class="w-full sm:w-auto bg-mutual hover:bg-green-700 text-white font-bold py-3 px-6 sm:px-8 rounded-lg shadow-md transition duration-200 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Ver mi Resultado
+                </button>
+                <button type="reset" id="btnLimpiar" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200">
+                    Limpiar
+                </button>
+            </div>
+        </form>
+
+        <!-- Contenedor para mostrar el resultado (oculto inicialmente) -->
+        <div id="contenedorResultado" class="mt-8 hidden border-t-2 border-gray-200 pt-6">
+            
+            <!-- Resumen del Puntaje -->
+            <div id="tarjetaPuntaje" class="bg-gray-50 rounded-xl p-4 sm:p-6 mb-6 text-center border border-gray-200">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Tu Resultado</h2>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+                    <p class="text-3xl sm:text-4xl font-extrabold text-mutual" id="puntajeTotalTexto">0 / 100</p>
+                    <p class="text-sm sm:text-base font-bold px-3 py-1 rounded-full" id="diagnosticoTexto"></p>
+                </div>
+                <p class="text-xs text-gray-500 mt-2" id="detallePuntaje"></p>
+            </div>
+
+            <!-- GRÁFICA DE BARRAS -->
+            <div class="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-gray-200 shadow-sm">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-mutual" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Puntaje por Categoría
+                </h3>
+                <div id="graficaContenedor" class="space-y-3 sm:space-y-4">
+                    <!-- Las barras se insertarán aquí dinámicamente -->
+                </div>
+            </div>
+
+            <!-- TEXTO PARA WHATSAPP -->
+            <div class="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 border-b pb-2">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Resumen en Texto</h3>
+                    <button type="button" id="btnCopiar" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center gap-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span id="textoBotonCopiar">Copiar para WhatsApp</span>
+                    </button>
+                </div>
+                <div id="textoResultado" class="resultado-texto"></div>
+            </div>
+        </div>
+
+        </section>
+        <section id="tab-dieta" class="hidden" role="tabpanel" aria-labelledby="tabBtnDieta" data-tab-panel="diet">
+            <div class="mb-6 border-b border-gray-200 pb-5">
+                <p class="text-sm font-semibold uppercase tracking-wide text-mutual">Evaluación nutricional</p>
+                <h1 class="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">Registro Dietético de 24 Horas</h1>
+                <p class="mt-2 text-sm font-semibold text-mutual" id="nombrePacienteDietaCabecera"></p>
+                <p class="mt-2 text-sm text-gray-600">Registra los alimentos y líquidos consumidos durante el día anterior.</p>
+            </div>
+
+            <div class="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-950" role="note" aria-label="Indicaciones para la entrevista">
+                <h2 class="mb-2 font-bold">Indicaciones para la entrevista</h2>
+                <ul class="list-disc space-y-1 pl-5">
+                    <li>Preguntar por todos los alimentos que comió y líquidos que tomó el día de ayer, incluyendo el agua, desde que se levantó hasta que se acostó.</li>
+                    <li>Si el alimento es una preparación (ej. charquicán), desglose cada ingrediente hacia abajo. Si es individual (ej. manzana), escriba solo el nombre.</li>
+                    <li>Preguntar detalles específicos: tipo de leche (entera, semi, descremada, polvo o líquida) y agregados comunes (azúcar, edulcorantes, saborizantes).</li>
+                </ul>
+            </div>
+
+            <form id="dietForm" class="space-y-6" novalidate>
+                <div class="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
+                    <div>
+                        <label for="nombrePacienteDieta" class="mb-1 block text-sm font-medium text-gray-700">Nombre paciente</label>
+                        <input id="nombrePacienteDieta" name="nombrePaciente" type="text" readonly required class="w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-700">
+                    </div>
+                    <div>
+                        <label for="diaSemana" class="mb-1 block text-sm font-medium text-gray-700">Día de la semana <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <select id="diaSemana" name="diaSemana" required class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-mutual focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <option value="">Selecciona un día</option>
+                            <option>Lunes</option>
+                            <option>Martes</option>
+                            <option>Miércoles</option>
+                            <option>Jueves</option>
+                            <option>Viernes</option>
+                            <option>Sábado</option>
+                            <option>Domingo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="comidasContenedor" class="space-y-4"></div>
+
+                <div class="flex justify-center border-t border-gray-200 pt-5">
+                    <button type="button" id="btnProcesarDieta" class="w-full rounded-lg bg-mutual px-6 py-3 font-bold text-white shadow-md transition hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mutual sm:w-auto">Guardar y exportar registro</button>
+                </div>
+            </form>
+
+            <section id="dietOutputSection" class="mt-6 hidden" aria-labelledby="dietOutputTitle">
+                <div class="mb-3 flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 id="dietOutputTitle" class="text-lg font-bold text-gray-800">Registro listo para compartir</h2>
+                    <button type="button" id="btnCopiarDieta" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow transition hover:bg-blue-700">Copiar para WhatsApp</button>
+                </div>
+                <div id="dietOutputText" class="resultado-texto" aria-live="polite"></div>
+            </section>
+        </section>
+        <section id="tab-frecuencia" class="hidden" role="tabpanel" aria-labelledby="tabBtnFrecuencia" data-tab-panel="frequency">
+            <div class="mb-6 border-b border-gray-200 pb-5">
+                <p class="text-sm font-semibold uppercase tracking-wide text-mutual">Cuestionario alimentario</p>
+                <h1 class="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">Frecuencia de Consumo de Alimentos</h1>
+                <p class="mt-2 text-sm font-semibold text-mutual" id="nombrePacienteFrecuenciaCabecera"></p>
+            </div>
+
+            <div class="mb-6 rounded-xl border border-green-100 bg-green-50 p-4 text-sm leading-6 text-gray-800" role="note">
+                Yo le iré diciendo diferentes alimentos y usted me dirá con qué frecuencia los toma: si no los toma NUNCA, o bien cada cuánto los toma, si cada DÍA (y el número de veces), cada SEMANA, cada MES o cada AÑO.
+            </div>
+
+            <form id="frequencyForm" class="space-y-5" novalidate>
+            <div class="mb-4 hidden gap-3 rounded-lg bg-gray-100 px-3 py-2 text-center text-xs font-bold uppercase tracking-wide text-gray-600 lg:grid lg:grid-cols-[minmax(0,2fr)_repeat(5,minmax(52px,0.65fr))]" aria-hidden="true">
+                <span class="text-left">Alimentos - cantidades</span>
+                <span>Nunca</span>
+                <span>Año</span>
+                <span>Mes</span>
+                <span>Sem.</span>
+                <span>Día</span>
+            </div>
+            <div id="frecuenciaCategorias" class="space-y-6"></div>
+
+            <section class="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:p-5" aria-labelledby="vitaminasTitle">
+                <h2 id="vitaminasTitle" class="text-lg font-bold text-gray-900">XI - Vitaminas</h2>
+                <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="consumeVitaminas" class="mb-1 block text-sm font-medium text-gray-700">¿Consume vitaminas o suplementos?</label>
+                        <select id="consumeVitaminas" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-mutual focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <option value="">Sin respuesta</option>
+                            <option value="no">No</option>
+                            <option value="si">Sí</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="detalleVitaminas" class="mb-1 block text-sm font-medium text-gray-700">Marca y dosis diaria</label>
+                        <input id="detalleVitaminas" type="text" maxlength="200" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-mutual focus:outline-none focus:ring-2 focus:ring-green-100" placeholder="Indica marca y dosis diaria">
+                    </div>
+                </div>
+            </section>
+            <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <button type="button" id="btnGuardarFrecuencia" class="rounded-lg bg-mutual px-5 py-3 font-bold text-white shadow-sm transition hover:bg-green-700">Guardar frecuencia</button>
+                <p id="frecuenciaEstado" class="text-sm text-gray-600" aria-live="polite"></p>
+            </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
